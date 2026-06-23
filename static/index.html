@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luca AI - Agentic Control Center</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome per icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sfondo Animato di Particelle -->
+    <div class="stars-bg"></div>
+
+    <div class="app-container">
+        <!-- HEADER GLASSMORPHIC -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-brain-circuit glow-icon"></i>
+                <h1>Luca<span>AI</span></h1>
+                <span class="badge">Local Agentic v1.0</span>
+            </div>
+            <nav class="app-nav">
+                <button class="nav-btn active" id="tab-dashboard-btn" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </button>
+                <button class="nav-btn" id="tab-settings-btn" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-gears"></i> Impostazioni (.env)
+                </button>
+            </nav>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- TAB DASHBOARD -->
+            <section class="tab-content active" id="tab-dashboard">
+                <!-- GRID AGENTI -->
+                <div class="cards-grid">
+                    <!-- CARD EMAIL -->
+                    <div class="agent-card glass-panel" id="card-email">
+                        <div class="card-glow"></div>
+                        <div class="agent-icon-wrapper purple-glow">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <h3>Email & Report Word</h3>
+                        <p>Scansiona le email non lette da fino a 4 account IMAP e genera un report Word (.docx) nella cartella lucaai con i compiti identificati.</p>
+                        <button class="action-btn" id="btn-run-email" onclick="runEmailAgent()">
+                            <i class="fa-solid fa-play"></i> Avvia Analisi
+                        </button>
+                    </div>
+
+                    <!-- CARD LEAD FINDER -->
+                    <div class="agent-card glass-panel" id="card-lead">
+                        <div class="card-glow"></div>
+                        <div class="agent-icon-wrapper blue-glow">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        </div>
+                        <h3>Lead & Marketing</h3>
+                        <p>Effettua ricerche avanzate sul web per trovare potenziali lead commerciali e scrive bozze di proposte marketing (.md) sul Desktop.</p>
+                        <div class="input-group">
+                            <input type="text" id="lead-query" placeholder="es. software house Torino" value="ristoranti biologici Milano">
+                        </div>
+                        <button class="action-btn" id="btn-run-lead" onclick="runLeadAgent()">
+                            <i class="fa-solid fa-play"></i> Avvia Ricerca
+                        </button>
+                    </div>
+
+                    <!-- CARD CALENDARIO -->
+                    <div class="agent-card glass-panel" id="card-calendar">
+                        <div class="card-glow"></div>
+                        <div class="agent-icon-wrapper cyan-glow">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <h3>Calendario & Promemoria</h3>
+                        <p>Controlla Google ed Outlook Calendar. Trova gli appuntamenti di domani e invia un promemoria email o prepara una chat WhatsApp.</p>
+                        <button class="action-btn" id="btn-run-calendar" onclick="runCalendarAgent()">
+                            <i class="fa-solid fa-play"></i> Scansiona Agende
+                        </button>
+                    </div>
+
+                    <!-- CARD VERBALE RIUNIONI -->
+                    <div class="agent-card glass-panel" id="card-meeting">
+                        <div class="card-glow"></div>
+                        <div class="agent-icon-wrapper green-glow">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                        </div>
+                        <h3>Registra Riunione</h3>
+                        <p>Registra dal microfono, esegue lo Speech-to-Text in italiano e crea un verbale formale in Word salvandolo nella cartella Riunioni.</p>
+                        
+                        <!-- Interfaccia Registratore -->
+                        <div class="recorder-interface">
+                            <div class="recorder-visualizer" id="audio-visualizer" style="display: none;">
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                            </div>
+                            <!-- Fallback Textarea -->
+                            <div class="fallback-input" id="fallback-container" style="display: none;">
+                                <label for="fallback-text">Trascrizione Manuale (Se senza microfono):</label>
+                                <textarea id="fallback-text" rows="3" placeholder="Incolla qui il testo della riunione..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="recorder-controls">
+                            <button class="action-btn red-btn" id="btn-record-meeting" onclick="toggleMeetingRecording()">
+                                <i class="fa-solid fa-microphone"></i> <span id="record-text">Avvia Registrazione</span>
+                            </button>
+                            <button class="action-btn secondary-btn" id="btn-fallback-meeting" onclick="showFallbackInput()" style="margin-top: 5px;">
+                                <i class="fa-solid fa-keyboard"></i> Inserimento Manuale
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONSOLE TERMINALE LIVE -->
+                <div class="console-wrapper glass-panel">
+                    <div class="console-header">
+                        <div class="console-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <span class="console-title">Live Agent Processing Console</span>
+                        <div class="console-actions">
+                            <button onclick="clearConsole()"><i class="fa-solid fa-trash-can"></i> Pulisci</button>
+                            <button onclick="copyConsole()"><i class="fa-solid fa-copy"></i> Copia</button>
+                        </div>
+                    </div>
+                    <div class="console-body" id="console-output">
+                        <span class="system-line">[SYSTEM] Control Center inizializzato con successo.</span>
+                        <span class="system-line">[SYSTEM] Pronto per l'esecuzione degli agenti locali.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB SETTINGS -->
+            <section class="tab-content" id="tab-settings">
+                <div class="settings-container glass-panel">
+                    <h2><i class="fa-solid fa-sliders"></i> Configurazione Luca AI (.env)</h2>
+                    <p class="settings-desc">Inserisci i parametri di connessione. I dati verranno salvati in modo sicuro nel file <code>.env</code> sul tuo PC.</p>
+                    
+                    <form id="settings-form" onsubmit="saveSettings(event)">
+                        <!-- Sezione Modello -->
+                        <div class="form-section">
+                            <h3><i class="fa-solid fa-brain"></i> Modello Locale (Ollama)</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="OLLAMA_BASE_URL">URL Base Ollama</label>
+                                    <input type="text" id="OLLAMA_BASE_URL" name="OLLAMA_BASE_URL" placeholder="http://localhost:11434">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Email IMAP/SMTP per ciascun Account -->
+                        <div class="form-section">
+                            <h3><i class="fa-solid fa-envelope"></i> Configurazione Account Email (IMAP/SMTP)</h3>
+                            <p class="settings-desc" style="margin-bottom: 15px;">Configura fino a 4 account diversi. Ciascun account può leggere (IMAP) e inviare (SMTP) email con le stesse credenziali.</p>
+                            <div class="form-grid">
+                                <!-- Account 1 -->
+                                <div class="form-column">
+                                    <h4>Account 1 (es. Gmail)</h4>
+                                    <div class="form-group">
+                                        <label for="EMAIL_1_ADDRESS">Indirizzo Email 1</label>
+                                        <input type="email" id="EMAIL_1_ADDRESS" name="EMAIL_1_ADDRESS" placeholder="utente1@gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_1_PASSWORD">Password per le App 1</label>
+                                        <input type="password" id="EMAIL_1_PASSWORD" name="EMAIL_1_PASSWORD" placeholder="••••••••••••••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_1_IMAP_SERVER">Server IMAP 1</label>
+                                        <input type="text" id="EMAIL_1_IMAP_SERVER" name="EMAIL_1_IMAP_SERVER" placeholder="imap.gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_1_SMTP_SERVER">Server SMTP 1 (Opzionale)</label>
+                                        <input type="text" id="EMAIL_1_SMTP_SERVER" name="EMAIL_1_SMTP_SERVER" placeholder="smtp.gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_1_SMTP_PORT">Porta SMTP 1 (Opzionale)</label>
+                                        <input type="number" id="EMAIL_1_SMTP_PORT" name="EMAIL_1_SMTP_PORT" placeholder="587">
+                                    </div>
+                                </div>
+                                <!-- Account 2 -->
+                                <div class="form-column">
+                                    <h4>Account 2 (es. Outlook)</h4>
+                                    <div class="form-group">
+                                        <label for="EMAIL_2_ADDRESS">Indirizzo Email 2</label>
+                                        <input type="email" id="EMAIL_2_ADDRESS" name="EMAIL_2_ADDRESS" placeholder="utente2@outlook.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_2_PASSWORD">Password per le App 2</label>
+                                        <input type="password" id="EMAIL_2_PASSWORD" name="EMAIL_2_PASSWORD" placeholder="••••••••••••••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_2_IMAP_SERVER">Server IMAP 2</label>
+                                        <input type="text" id="EMAIL_2_IMAP_SERVER" name="EMAIL_2_IMAP_SERVER" placeholder="outlook.office365.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_2_SMTP_SERVER">Server SMTP 2 (Opzionale)</label>
+                                        <input type="text" id="EMAIL_2_SMTP_SERVER" name="EMAIL_2_SMTP_SERVER" placeholder="smtp.office365.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_2_SMTP_PORT">Porta SMTP 2 (Opzionale)</label>
+                                        <input type="number" id="EMAIL_2_SMTP_PORT" name="EMAIL_2_SMTP_PORT" placeholder="587">
+                                    </div>
+                                </div>
+                                <!-- Account 3 -->
+                                <div class="form-column">
+                                    <h4>Account 3</h4>
+                                    <div class="form-group">
+                                        <label for="EMAIL_3_ADDRESS">Indirizzo Email 3</label>
+                                        <input type="email" id="EMAIL_3_ADDRESS" name="EMAIL_3_ADDRESS" placeholder="utente3@gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_3_PASSWORD">Password per le App 3</label>
+                                        <input type="password" id="EMAIL_3_PASSWORD" name="EMAIL_3_PASSWORD" placeholder="••••••••••••••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_3_IMAP_SERVER">Server IMAP 3</label>
+                                        <input type="text" id="EMAIL_3_IMAP_SERVER" name="EMAIL_3_IMAP_SERVER" placeholder="imap.gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_3_SMTP_SERVER">Server SMTP 3 (Opzionale)</label>
+                                        <input type="text" id="EMAIL_3_SMTP_SERVER" name="EMAIL_3_SMTP_SERVER" placeholder="smtp.gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_3_SMTP_PORT">Porta SMTP 3 (Opzionale)</label>
+                                        <input type="number" id="EMAIL_3_SMTP_PORT" name="EMAIL_3_SMTP_PORT" placeholder="587">
+                                    </div>
+                                </div>
+                                <!-- Account 4 -->
+                                <div class="form-column">
+                                    <h4>Account 4</h4>
+                                    <div class="form-group">
+                                        <label for="EMAIL_4_ADDRESS">Indirizzo Email 4</label>
+                                        <input type="email" id="EMAIL_4_ADDRESS" name="EMAIL_4_ADDRESS" placeholder="utente4@outlook.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_4_PASSWORD">Password per le App 4</label>
+                                        <input type="password" id="EMAIL_4_PASSWORD" name="EMAIL_4_PASSWORD" placeholder="••••••••••••••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_4_IMAP_SERVER">Server IMAP 4</label>
+                                        <input type="text" id="EMAIL_4_IMAP_SERVER" name="EMAIL_4_IMAP_SERVER" placeholder="outlook.office365.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_4_SMTP_SERVER">Server SMTP 4 (Opzionale)</label>
+                                        <input type="text" id="EMAIL_4_SMTP_SERVER" name="EMAIL_4_SMTP_SERVER" placeholder="smtp.office365.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="EMAIL_4_SMTP_PORT">Porta SMTP 4 (Opzionale)</label>
+                                        <input type="number" id="EMAIL_4_SMTP_PORT" name="EMAIL_4_SMTP_PORT" placeholder="587">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Sezione Green API (WhatsApp) -->
+                        <div class="form-section">
+                            <h3><i class="fa-brands fa-whatsapp"></i> Connessione WhatsApp (Green API)</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="GREEN_API_ID_INSTANCE">ID Istanza Green API</label>
+                                    <input type="text" id="GREEN_API_ID_INSTANCE" name="GREEN_API_ID_INSTANCE" placeholder="es. 1101823432">
+                                </div>
+                                <div class="form-group">
+                                    <label for="GREEN_API_TOKEN_INSTANCE">Token API Istanza</label>
+                                    <input type="password" id="GREEN_API_TOKEN_INSTANCE" name="GREEN_API_TOKEN_INSTANCE" placeholder="••••••••••••••••">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sezione OpenAI (Whisper Vocale) -->
+                        <div class="form-section">
+                            <h3><i class="fa-solid fa-key"></i> Chiave OpenAI (Whisper Trascrizione Vocale)</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="OPENAI_API_KEY">OpenAI API Key</label>
+                                    <input type="password" id="OPENAI_API_KEY" name="OPENAI_API_KEY" placeholder="sk-proj-••••••••••••••••">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Outlook API -->
+                        <div class="form-section">
+                            <h3><i class="fa-brands fa-microsoft"></i> Connessione Outlook Calendar API</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="OUTLOOK_CLIENT_ID">Client ID (Azure Portal)</label>
+                                    <input type="text" id="OUTLOOK_CLIENT_ID" name="OUTLOOK_CLIENT_ID" placeholder="00000000-0000-0000-0000-000000000000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="OUTLOOK_CLIENT_SECRET">Client Secret (Azure Portal)</label>
+                                    <input type="password" id="OUTLOOK_CLIENT_SECRET" name="OUTLOOK_CLIENT_SECRET" placeholder="••••••••••••••••">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn"><i class="fa-solid fa-floppy-disk"></i> Salva Configurazione</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer-bar">
+            <p>&copy; 2026 Luca AI. Eseguito interamente in locale. Privacy garantita al 100%.</p>
+        </footer>
+    </div>
+
+    <!-- Script JS -->
+    <script src="app.js"></script>
+</body>
+</html>
