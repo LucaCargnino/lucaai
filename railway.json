@@ -1,0 +1,12 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "nixpacks": {
+      "apt": [
+        "libportaudio2",
+        "portaudio19-dev"
+      ]
+    }
+  }
+}
+
